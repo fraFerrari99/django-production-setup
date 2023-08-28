@@ -1,13 +1,13 @@
 # Django Production Setup 
 
 This is the code repository that I decided to create to offer a Django Production Setup. The technologies that I decided to use to create the setup are:
-  - Docker: it is used to build, deploy and run application containers;
-  - PostgreSQL: it is used as the default database;
-  - Nginx: it acts as a reverse proxy, receiving HTTP requests and redirecting them to different backend. Also in a website you have not only the dynamic content, but also static files like images, JavaScript files and CSS style sheets and Nginx serve them efficiently;
-  - Redis: it is used as a cache service;
-  - uWSGI: it is a standard web server used to deploy the application in a production environment.
+  - Docker: used to build, deploy and run application containers;
+  - PostgreSQL: used as the default database;
+  - Nginx: acts as a reverse proxy, receiving HTTP requests and redirecting them to different backend. Also in a website you have not only the dynamic content, but also static files like images, JavaScript files and CSS style sheets and Nginx serve them efficiently;
+  - Redis: used as a cache service;
+  - uWSGI: a standard web server used to deploy the application in a production environment.
 
-We will see them in a more detailed way :smiley:
+Let's see them in a more detailed way :smiley:
 
 ## Structure of the project
 
@@ -19,11 +19,11 @@ This diagram shows the request/response cycle of the production environment:
   3. uWSGI passes the request received through the socket from NGINX to Django that will process it;
   4. Django processes the HTTP request and returns the HTTP response back to the NGINX, that returns it to the client. 
 
-The web server NGINX not only serves the request but also the static and media (the ones that the user maybe can upload) files in production environment. 
+The web server NGINX not only serves the request, but also the static and media (the ones that the user maybe can upload) files in production environment. 
 
 ## Instructions
 
-These are the commands that you need to run and know to use Docker and run the project:
+These are all the instructions that you need to follow to run the Docker containers and to setup your project for the production environment!
 
 ### Run Docker 
 
@@ -55,7 +55,7 @@ This will run both the build and the up docker commands.
 
 There are different steps to follow to use this Django production setup:
 
-- As you can see, there's an `.env` file where there are different environment variables defined and these are: 
+- As you can see, there's an `.env` file where there are different environment variables defined as follows: 
   - `ADMIN_EMAIL`: it is the email address of the admin user that will be used inside the `prod.py` settings file; if a view raises an exception, Django will send an email containing the error message to the email address specified in it;
   - `POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD`: these are the settings that will be used to create the database credentials (name, name of the user and db's password);
   
