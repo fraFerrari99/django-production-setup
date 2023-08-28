@@ -1,0 +1,61 @@
+#!In the docker-compose.yml file you need to specify all the services that you want to create, each one with its own container!
+services:
+
+  db: # this is the service related to the postgres db
+    image: postgres:15 
+    container_name: db_container
+    restart: always
+    volumes:
+      - ./data/db:/var/lib/postgresql/data # we mount the local directory /data/db into the image directory /var/lib/postgresql/data to persist the data of the database!
+    environment:
+      - POSTGRES_DB=$POSTGRES_DB
+      - POSTGRES_USER=$POSTGRES_USER
+      - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+  
+  cache: # this is the service related to the redis cache
+    image: redis:7.2 
+    container_name: redis_container
+    restart: always
+    volumes:
+      - ./data/cache:/data # we mount the local directory /data/cache into the image directory /data to persist the data of the cache!
+
+  web: # this is the service related to the django project
+    build: . # build the Dockerfile that is created in the local directory 
+    container_name: django_container
+
+    # This command is used for the development 
+    # command: ["./wait-for-it.sh", "db:5432", "--", # it needs to wait for the db to be ready before running the django development server!
+    #           "python", "/code/django_prod_skeleton/manage.py", "runserver", 
+    #           "0.0.0.0:8000"] 
+    
+    # This command is used for the production
+    command: ["./wait-for-it.sh", "db:5432", "--", # it needs to wait for the db to be ready before running the django development server!
+              "uwsgi", "--ini", "/code/config/uwsgi/uwsgi.ini"] 
+
+    restart: always # the container is restarted always if it stops!
+    volumes: # volumes is used to persist and save data generated and used by the container since data in the container is not permanent!
+      - .:/code  # we are mounting the local directory . into the /code working directory of the image!
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_SETTINGS_MODULE=django_prod_skeleton.settings.prod
+      - POSTGRES_DB=$POSTGRES_DB
+      - POSTGRES_USER=$POSTGRES_USER
+      - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+    depends_on:
+      - db 
+      - cache  #in this way the web service will start after the cache service is started
+  
+  nginx: # this is the service related to the nginx web server that acts as a reverse proxy
+    image: nginx:1.25
+    container_name: nginx_container
+    restart: always
+    volumes:
+      - ./config/nginx:/etc/nginx/conf.d # this mount the volume ./config/nginx to the /etc/nginx/templates directory of the image. Nginx will search for the default configuration file there!
+      - .:/code # This will mount the local directory . to the /code directory of the image, so that Nginx can access the static files!s
+    ports:
+      - "80:80" #this is for http
+      - "443:443" #this is for https
+
+
+    
